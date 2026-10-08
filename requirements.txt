@@ -1,0 +1,2 @@
+# Built-in standard library - zero external dependencies required!
+gunicorn>=21.0.0

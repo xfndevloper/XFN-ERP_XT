@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XFN-ERP_NEXT | Construction Workforce & Materials</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="app-header">
+    <div class="brand-container">
+      <div class="logo-badge">XFN-ERP</div>
+      <div class="brand-text">
+        <h1>XFINITY BUILDCON PRIVATE LIMITED</h1>
+        <span>Enterprise Construction & Labor Operations Platform</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="live-badge">
+        <div class="pulse-dot"></div>
+        <span id="liveClock">--:--:--</span>
+      </div>
+      <select id="headerSiteFilter" class="form-control" style="background:#1e293b; color:white; border-color:#334155; font-weight:600;">
+        <option value="">🌐 All Construction Sites</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Nav Tabs -->
+  <nav class="nav-bar">
+    <div class="nav-tab active" data-tab="dashboard">📊 Control Room</div>
+    <div class="nav-tab" data-tab="workers">👷 Workforce & Kiosk (150+)</div>
+    <div class="nav-tab" data-tab="sites">🏗️ Sites & Projects</div>
+    <div class="nav-tab" data-tab="inventory">🧱 Materials & Stock</div>
+    <div class="nav-tab" data-tab="pos">📑 Purchase Orders & GST</div>
+    <div class="nav-tab" data-tab="payroll">💰 Payroll & Wage Sheet</div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- TAB 1: DASHBOARD -->
+    <section id="tab-dashboard" class="view-panel active">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-title">Active Workforce</span>
+          <span class="kpi-value" id="kpiTotalWorkers">0</span>
+          <span class="kpi-sub">Total registered workers</span>
+        </div>
+        <div class="kpi-card" style="border-left: 4px solid var(--success);">
+          <span class="kpi-title">Checked-In On Site</span>
+          <span class="kpi-value" id="kpiCheckedInNow" style="color:var(--success);">0</span>
+          <span class="kpi-sub">Currently on active shift</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-title">Active Sites</span>
+          <span class="kpi-value" id="kpiActiveSites">0</span>
+          <span class="kpi-sub">Ongoing project locations</span>
+        </div>
+        <div class="kpi-card" style="border-left: 4px solid var(--danger);">
+          <span class="kpi-title">Low Stock Materials</span>
+          <span class="kpi-value" id="kpiLowStock" style="color:var(--danger);">0</span>
+          <span class="kpi-sub">Below reorder threshold</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-title">Today's Wage Accrual</span>
+          <span class="kpi-value" id="kpiTodayWages" style="color:var(--primary);">₹0</span>
+          <span class="kpi-sub">Estimated labor cost today</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-title">Active PO Value</span>
+          <span class="kpi-value" id="kpiTotalPOs" style="color:var(--accent);">₹0</span>
+          <span class="kpi-sub">Material procurement total</span>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <div class="section-header">
+          <div class="section-title">⏱️ Live Site Attendance Stream</div>
+          <button class="btn btn-secondary" onclick="loadDashboard()">🔄 Refresh Live Stream</button>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Worker Name</th>
+                <th>Trade</th>
+                <th>Site</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Status</th>
+                <th>Wage Earned</th>
+              </tr>
+            </thead>
+            <tbody id="dashboardLogsBody">
+              <tr><td colspan="7" style="text-align:center;">Loading live stream...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: WORKFORCE & KIOSK -->
+    <section id="tab-workers" class="view-panel">
+      <div class="card-section">
+        <div class="section-header">
+          <div>
+            <div class="section-title">👷 Workforce Master Directory</div>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Manage 150+ workers, trades, daily wages, and 1-tap site kiosk punches.</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input type="text" id="workerSearchInput" class="form-control" placeholder="🔍 Search name, code, phone..." oninput="filterWorkers()">
+            <select id="workerTradeFilter" class="form-control" onchange="filterWorkers()">
+              <option value="">All Trades</option>
+              <option value="Mason / Mistri">Mason / Mistri</option>
+              <option value="Carpenter / Shuttering">Carpenter / Shuttering</option>
+              <option value="Bar Bender / Steel Fixer">Bar Bender / Steel Fixer</option>
+              <option value="Electrician">Electrician</option>
+              <option value="Plumber">Plumber</option>
+              <option value="Painter">Painter</option>
+              <option value="Tile & Marble Setter">Tile & Marble Setter</option>
+              <option value="Crane / JCB Operator">Crane / JCB Operator</option>
+              <option value="Site Supervisor">Site Supervisor</option>
+              <option value="General Construction Helper">General Construction Helper</option>
+            </select>
+            <button class="btn btn-accent" onclick="openAddWorkerModal()">➕ Add New Worker</button>
+          </div>
+        </div>
+
+        <div class="worker-grid" id="workersContainer">
+          <!-- Worker cards rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: SITES & PROJECTS -->
+    <section id="tab-sites" class="view-panel">
+      <div class="card-section">
+        <div class="section-header">
+          <div>
+            <div class="section-title">🏗️ Construction Projects & Active Sites</div>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Site locations, labor strength, and site engineer assignments.</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Site Code</th>
+                <th>Project Name</th>
+                <th>Location</th>
+                <th>Site In-Charge</th>
+                <th>Assigned Labor</th>
+                <th>Present Today</th>
+                <th>Budget (₹)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="sitesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: MATERIALS & INVENTORY -->
+    <section id="tab-inventory" class="view-panel">
+      <div class="card-section">
+        <div class="section-header">
+          <div>
+            <div class="section-title">🧱 Construction Materials & Site Stock</div>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Cement, Steel Rebar, River Sand, Aggregates, Bricks & Site Issues.</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-success" onclick="openStockModal('INWARD')">📥 Material Inward (MRN)</button>
+            <button class="btn btn-primary" onclick="openStockModal('OUTWARD')">📤 Site Issue (Outward)</button>
+            <button class="btn btn-secondary" onclick="openAddMaterialModal()">➕ Add New Item</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Item Code</th>
+                <th>Material Name</th>
+                <th>Category</th>
+                <th>Current Stock</th>
+                <th>Reorder Level</th>
+                <th>Standard Rate</th>
+                <th>Stock Status</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <div class="section-header">
+          <div class="section-title">📦 Recent Stock Movements (Inward / Outward)</div>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Material</th>
+                <th>Quantity</th>
+                <th>Site</th>
+                <th>Handled By</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="movementsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: PURCHASE ORDERS & GST -->
+    <section id="tab-pos" class="view-panel">
+      <div class="card-section">
+        <div class="section-header">
+          <div>
+            <div class="section-title">📑 Purchase Orders & Procurement (Indian GST)</div>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Vendor purchase orders with automatic CGST/SGST/IGST tax breakdowns.</p>
+          </div>
+          <button class="btn btn-accent" onclick="openCreatePOModal()">➕ Create Purchase Order</button>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>PO Number</th>
+                <th>Date</th>
+                <th>Supplier / Vendor</th>
+                <th>Delivery Site</th>
+                <th>Subtotal</th>
+                <th>GST Rate</th>
+                <th>Grand Total (₹)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="poTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: PAYROLL & WAGES -->
+    <section id="tab-payroll" class="view-panel">
+      <div class="card-section">
+        <div class="section-header">
+          <div>
+            <div class="section-title">💰 Monthly Muster Roll & Wage Sheet</div>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Calculate daily wages, total hours, overtime, and export for bank payouts.</p>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <label style="font-size:0.85rem; font-weight:600;">From:</label>
+            <input type="date" id="payrollFromDate" class="form-control">
+            <label style="font-size:0.85rem; font-weight:600;">To:</label>
+            <input type="date" id="payrollToDate" class="form-control">
+            <button class="btn btn-primary" onclick="loadPayroll()">🔄 Compute</button>
+            <button class="btn btn-success" onclick="exportPayrollCSV()">📥 Export Muster Roll (CSV)</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Worker Name</th>
+                <th>Trade</th>
+                <th>Site</th>
+                <th>Daily Wage (₹)</th>
+                <th>Days Present</th>
+                <th>Total Hours</th>
+                <th>OT Hours</th>
+                <th>Net Payable (₹)</th>
+              </tr>
+            </thead>
+            <tbody id="payrollTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: ADD WORKER -->
+  <div id="modalAddWorker" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">➕ Register Construction Worker</div>
+        <button class="modal-close" onclick="closeModal('modalAddWorker')">&times;</button>
+      </div>
+      <form id="addWorkerForm" onsubmit="submitAddWorker(event)">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <label style="font-size:0.8rem; font-weight:700;">Worker Full Name *</label>
+            <input type="text" id="newWorkerName" class="form-control" style="width:100%;" required placeholder="e.g. Ramesh Kumar">
+          </div>
+          <div>
+            <label style="font-size:0.8rem; font-weight:700;">Trade / Skill *</label>
+            <select id="newWorkerTrade" class="form-control" style="width:100%;" required>
+              <option value="Mason / Mistri">Mason / Mistri</option>
+              <option value="Carpenter / Shuttering">Carpenter / Shuttering</option>
+              <option value="Bar Bender / Steel Fixer">Bar Bender / Steel Fixer</option>
+              <option value="Electrician">Electrician</option>
+              <option value="Plumber">Plumber</option>
+              <option value="Painter">Painter</option>
+              <option value="Tile & Marble Setter">Tile & Marble Setter</option>
+              <option value="Crane / JCB Operator">Crane / JCB Operator</option>
+              <option value="Site Supervisor">Site Supervisor</option>
+              <option value="General Construction Helper">General Construction Helper</option>
+            </select>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label style="font-size:0.8rem; font-weight:700;">Daily Wage (₹) *</label>
+              <input type="number" id="newWorkerWage" class="form-control" style="width:100%;" value="650" required>
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700;">OT Rate (₹/hr)</label>
+              <input type="number" id="newWorkerOT" class="form-control" style="width:100%;" value="110">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:0.8rem; font-weight:700;">Assigned Site</label>
+            <select id="newWorkerSite" class="form-control" style="width:100%;"></select>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label style="font-size:0.8rem; font-weight:700;">Phone Number</label>
+              <input type="text" id="newWorkerPhone" class="form-control" style="width:100%;" placeholder="+91 ...">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700;">Kiosk PIN</label>
+              <input type="text" id="newWorkerPIN" class="form-control" style="width:100%;" value="1234">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Save Worker</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: STOCK MOVEMENT -->
+  <div id="modalStockMove" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title" id="stockMoveTitle">📦 Record Stock Movement</div>
+        <button class="modal-close" onclick="closeModal('modalStockMove')">&times;</button>
+      </div>
+      <form id="stockMoveForm" onsubmit="submitStockMove(event)">
+        <input type="hidden" id="stockMoveType">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <label style="font-size:0.8rem; font-weight:700;">Material Item *</label>
+            <select id="stockMoveItem" class="form-control" style="width:100%;" required></select>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label style="font-size:0.8rem; font-weight:700;">Quantity *</label>
+              <input type="number" step="any" id="stockMoveQty" class="form-control" style="width:100%;" required>
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700;">Rate per Unit (₹)</label>
+              <input type="number" step="any" id="stockMoveRate" class="form-control" style="width:100%;" value="0">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:0.8rem; font-weight:700;">Site *</label>
+            <select id="stockMoveSite" class="form-control" style="width:100%;" required></select>
+          </div>
+          <div>
+            <label style="font-size:0.8rem; font-weight:700;">Invoice / MRN / Reference No.</label>
+            <input type="text" id="stockMoveRef" class="form-control" style="width:100%;" placeholder="e.g. INV-9042">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">Submit Movement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE PO -->
+  <div id="modalCreatePO" class="modal-backdrop">
+    <div class="modal-box" style="max-width:600px;">
+      <div class="modal-header">
+        <div class="modal-title">📑 Generate Purchase Order (PO)</div>
+        <button class="modal-close" onclick="closeModal('modalCreatePO')">&times;</button>
+      </div>
+      <form id="createPOForm" onsubmit="submitCreatePO(event)">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <label style="font-size:0.8rem; font-weight:700;">Select Vendor / Supplier *</label>
+            <select id="poVendor" class="form-control" style="width:100%;" required></select>
+          </div>
+          <div>
+            <label style="font-size:0.8rem; font-weight:700;">Delivery Site *</label>
+            <select id="poSite" class="form-control" style="width:100%;" required></select>
+          </div>
+          <div>
+            <label style="font-size:0.8rem; font-weight:700;">Material Description *</label>
+            <input type="text" id="poItemDesc" class="form-control" style="width:100%;" placeholder="e.g. 500 Bags OPC 53 Cement" required>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+            <div>
+              <label style="font-size:0.8rem; font-weight:700;">Quantity</label>
+              <input type="number" id="poQty" class="form-control" style="width:100%;" value="100" required oninput="calcPOTotal()">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700;">Unit Rate (₹)</label>
+              <input type="number" id="poRate" class="form-control" style="width:100%;" value="380" required oninput="calcPOTotal()">
+            </div>
+            <div>
+              <label style="font-size:0.8rem; font-weight:700;">GST %</label>
+              <select id="poGSTRate" class="form-control" style="width:100%;" onchange="calcPOTotal()">
+                <option value="18">18% (Standard)</option>
+                <option value="28">28% (Cement)</option>
+                <option value="12">12%</option>
+                <option value="5">5%</option>
+                <option value="0">0% (Nil)</option>
+              </select>
+            </div>
+          </div>
+          <div style="background:#f8fafc; padding:12px; border-radius:6px; border:1px solid var(--border); font-size:0.9rem;">
+            <div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><strong id="poSubtotalLabel">₹38,000</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>GST Tax:</span><strong id="poGSTLabel">₹6,840</strong></div>
+            <hr style="margin:6px 0; border:none; border-top:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; font-size:1.05rem; color:var(--primary);"><span>Grand Total:</span><strong id="poGrandTotalLabel">₹44,840</strong></div>
+          </div>
+          <button type="submit" class="btn btn-accent" style="width:100%;">Create & Approve Purchase Order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
