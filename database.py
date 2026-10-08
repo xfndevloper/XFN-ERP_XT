@@ -249,7 +249,7 @@ def init_erp_database():
 
     conn.commit()
     conn.close()
-    print("XFN-ERP_NEXT Database Initialized Successfully!")
+    print("XFN-ERP_XT Database Initialized Successfully!")
 
 def seed_150_workers(cursor):
     first_names = [

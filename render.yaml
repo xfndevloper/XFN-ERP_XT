@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: xfn-erp
+    name: xfn-erp-xt
     env: python
     plan: free
     buildCommand: ""

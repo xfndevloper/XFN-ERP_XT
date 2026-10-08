@@ -1,6 +1,6 @@
 @echo off
-title XFN-ERP_NEXT Mobile Cloud Link - Xfinity Buildcon
-cd /d "C:\XFN-ERP_NEXT"
+title XFN-ERP_XT Mobile Cloud Link - Xfinity Buildcon
+cd /d "C:\XFN-ERP_XT"
 echo ============================================================
 echo   LAUNCHING FREE CLOUD TUNNEL FOR 150+ MOBILE WORKERS
 echo   (No Port Forwarding, No Credit Card, 100%% Free)

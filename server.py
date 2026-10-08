@@ -482,7 +482,7 @@ def start_server():
             with socketserver.ThreadingTCPServer(("0.0.0.0", PORT), XFNERPRequestHandler) as httpd:
                 local_ip = get_local_ip()
                 print(f"============================================================")
-                print(f" XFN-ERP_NEXT ENTERPRISE CONSTRUCTION SERVER RUNNING")
+                print(f" XFN-ERP_XT ENTERPRISE CONSTRUCTION SERVER RUNNING")
                 print(f"============================================================")
                 print(f" -> Local Laptop Access:   http://localhost:{PORT}")
                 print(f" -> Mobile / Site Access:  http://{local_ip}:{PORT}")
